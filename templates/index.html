@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+/* Hero Section */
+.hero-section{
+    background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+    color:white;
+    padding:100px 0;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+}
+
+.hero-section h1{
+    font-size:3.2rem;
+    font-weight:700;
+    margin-bottom:20px;
+    letter-spacing:1px;
+}
+
+.hero-section p{
+    font-size:1.3rem;
+    opacity:0.9;
+}
+
+.hero-section .btn{
+    padding:12px 28px;
+    border-radius:30px;
+    font-weight:600;
+    transition: all 0.3s ease;
+}
+
+.hero-section .btn:hover{
+    transform:translateY(-3px);
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+/* Feature Cards */
+
+.card{
+    border:none;
+    border-radius:15px;
+    transition: all 0.3s ease;
+    box-shadow:0 5px 20px rgba(0,0,0,0.08);
+}
+
+.card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 15px 35px rgba(0,0,0,0.15);
+}
+
+.card-body{
+    padding:35px 25px;
+}
+
+.card h2{
+    font-size:2.5rem;
+}
+
+/* Why Shop Section */
+
+.container h2{
+    font-weight:700;
+    margin-bottom:15px;
+}
+
+.text-muted{
+    font-size:1.05rem;
+}
+
+/* Button styling */
+
+.btn-primary{
+    border-radius:30px;
+    padding:12px 30px;
+    font-weight:600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* Responsive */
+
+@media (max-width:768px){
+
+.hero-section{
+padding:70px 20px;
+}
+
+.hero-section h1{
+font-size:2.3rem;
+}
+
+.hero-section p{
+font-size:1.05rem;
+}
+
+}
+</style>
+
+
+<div class="hero-section">
+    <div class="container">
+        <h1>Welcome to E-Commerce Store</h1>
+        <p>Discover amazing products at unbeatable prices</p>
+        
+        {% if not session.user_id %}
+            <div>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg" style="margin-right: 10px;">Get Started</a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">Login</a>
+            </div>
+        {% else %}
+            <a href="{{ url_for('product.list_products') }}" class="btn btn-light btn-lg">Shop Now</a>
+        {% endif %}
+    </div>
+</div>
+
+
+<div class="container mt-5">
+
+    <div class="row">
+
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 style="margin-bottom:10px;">🚚</h2>
+                    <h5 class="card-title">Fast Delivery</h5>
+                    <p class="card-text">Get your products delivered quickly and safely</p>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 style="margin-bottom:10px;">💳</h2>
+                    <h5 class="card-title">Secure Payment</h5>
+                    <p class="card-text">Safe and secure payment options for you</p>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h2 style="margin-bottom:10px;">⭐</h2>
+                    <h5 class="card-title">Quality Products</h5>
+                    <p class="card-text">100% authentic and quality guaranteed products</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <h2>Why Shop With Us?</h2>
+            <p class="text-muted">We provide the best shopping experience with genuine products and excellent customer service</p>
+            
+            {% if not session.user_id %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg mt-3">Start Shopping Today</a>
+            {% else %}
+                <a href="{{ url_for('product.list_products') }}" class="btn btn-primary btn-lg mt-3">Browse Products</a>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

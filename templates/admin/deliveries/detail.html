@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <a href="{{ url_for('admin.delivery_list') }}" class="btn btn-secondary mb-3">← Back</a>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Delivery Tracking Timeline -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Delivery Tracking - Order #{{ order.order_id }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for track in tracking %}
+                        <div class="timeline-item mb-4">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <span class="badge bg-primary" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">✓</span>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6>{{ track.status|replace('_', ' ')|upper }}</h6>
+                                    <p class="text-muted small mb-1">{{ track.status_update_date.strftime('%d %b %Y, %I:%M %p') }}</p>
+                                    {% if track.location %}
+                                    <p class="mb-1">📍 <strong>{{ track.location }}</strong></p>
+                                    {% endif %}
+                                    {% if track.notes %}
+                                    <p class="text-muted small">{{ track.notes }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shipping Address -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Shipping Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Delivery Address</h6>
+                            <p>
+                                <strong>{{ order.street_address }}</strong><br>
+                                {{ order.city }}, {{ order.state }} - {{ order.postal_code }}<br>
+                                <strong>Phone:</strong> {{ order.phone }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Estimated Delivery</h6>
+                            <p><strong>{{ order.estimated_delivery.strftime('%d %b %Y') }}</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <div class="card sticky-top">
+                <div class="card-header">
+                    <h5>Update Tracking</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('admin.update_delivery', order_id=order.order_id) }}">
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="">-- Select Status --</option>
+                                <option value="processing">Processing</option>
+                                <option value="packed">Packed</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="out_for_delivery">Out for Delivery</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="location" name="location" placeholder="e.g., Warehouse, In Transit, City">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Additional notes..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">Update Status</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

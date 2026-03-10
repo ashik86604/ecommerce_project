@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h1>Admin Dashboard</h1>
+    <p class="text-muted">Welcome, {{ session.get('username', 'Admin') }} ({{ role|upper }})</p>
+    
+    <div class="row mt-4">
+        <!-- PRODUCT MANAGER STATS -->
+        {% if role in ['super_admin', 'product_manager'] %}
+        <div class="col-md-3 mb-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Products</h5>
+                    <h2>{{ total_products }}</h2>
+                </div>
+                <div class="card-footer bg-primary">
+                    <a href="{{ url_for('admin.product_list') }}" class="text-white text-decoration-none">Manage Products →</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Categories</h5>
+                    <h2>{{ total_categories }}</h2>
+                </div>
+                <div class="card-footer bg-success">
+                    <a href="{{ url_for('admin.category_list') }}" class="text-white text-decoration-none">Manage Categories →</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Low Stock</h5>
+                    <h2>{{ low_stock }}</h2>
+                </div>
+                <div class="card-footer bg-warning">
+                    <small>Products with < 10 units</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- ORDER MANAGER STATS -->
+        {% if role in ['super_admin', 'order_manager'] %}
+        <div class="col-md-3 mb-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Orders</h5>
+                    <h2>{{ total_orders }}</h2>
+                </div>
+                <div class="card-footer bg-info">
+                    <a href="{{ url_for('admin.order_list') }}" class="text-white text-decoration-none">Manage Orders →</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Orders</h5>
+                    <h2>{{ pending_orders }}</h2>
+                </div>
+                <div class="card-footer bg-danger">
+                    <a href="{{ url_for('admin.order_list', status='placed') }}" class="text-white text-decoration-none">View Pending →</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-secondary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Payment Verified</h5>
+                    <h2>{{ verified_orders }}</h2>
+                </div>
+                <div class="card-footer bg-secondary">
+                    <a href="{{ url_for('admin.order_list', status='payment_verified') }}" class="text-white text-decoration-none">View Orders →</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- PAYMENT MANAGER STATS -->
+        {% if role in ['super_admin', 'payment_manager'] %}
+        <div class="col-md-3 mb-4">
+            <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="card-body">
+                    <h5 class="card-title">Total Payments</h5>
+                    <h2>{{ total_payments }}</h2>
+                </div>
+                <div class="card-footer" style="background-color: rgba(0,0,0,0.1);">
+                    <a href="{{ url_for('admin.payment_list') }}" class="text-white text-decoration-none">Manage Payments →</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Payments</h5>
+                    <h2>{{ pending_payments }}</h2>
+                </div>
+                <div class="card-footer bg-danger">
+                    <small>Awaiting verification</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Revenue</h5>
+                    <h2>₹{{ (total_revenue/100000)|round(1) }}L</h2>
+                </div>
+                <div class="card-footer bg-success">
+                    <small>Total successful payments</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- DELIVERY MANAGER STATS -->
+        {% if role in ['super_admin', 'delivery_manager'] %}
+        <div class="col-md-3 mb-4">
+            <div class="card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                <div class="card-body">
+                    <h5 class="card-title">In Transit</h5>
+                    <h2>{{ in_transit }}</h2>
+                </div>
+                <div class="card-footer" style="background-color: rgba(0,0,0,0.1);">
+                    <a href="{{ url_for('admin.delivery_list', status='in_transit') }}" class="text-white text-decoration-none">View →</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Out for Delivery</h5>
+                    <h2>{{ total_deliveries }}</h2>
+                </div>
+                <div class="card-footer bg-info">
+                    <a href="{{ url_for('admin.delivery_list') }}" class="text-white text-decoration-none">Manage Deliveries →</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Delivered</h5>
+                    <h2>{{ delivered }}</h2>
+                </div>
+                <div class="card-footer bg-success">
+                    <small>Successfully delivered</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- GENERAL STATS (All Roles) -->
+        <div class="col-md-3 mb-4">
+            <div class="card bg-dark text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Customers</h5>
+                    <h2>{{ total_customers }}</h2>
+                </div>
+                <div class="card-footer bg-dark">
+                    <small>Registered users</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    {% if role in ['super_admin', 'product_manager'] %}
+                        <a href="{{ url_for('admin.add_product') }}" class="btn btn-primary">+ Add Product</a>
+                        <a href="{{ url_for('admin.product_list') }}" class="btn btn-info">View Products</a>
+                        <a href="{{ url_for('admin.add_category') }}" class="btn btn-success">+ Add Category</a>
+                        <a href="{{ url_for('admin.category_list') }}" class="btn btn-secondary">View Categories</a>
+                    {% endif %}
+                    
+                    {% if role in ['super_admin', 'order_manager'] %}
+                        <a href="{{ url_for('admin.order_list') }}" class="btn btn-info">View Orders</a>
+                        <a href="{{ url_for('admin.order_list', status='placed') }}" class="btn btn-warning">Pending Orders</a>
+                    {% endif %}
+                    
+                    {% if role in ['super_admin', 'payment_manager'] %}
+                        <a href="{{ url_for('admin.payment_list') }}" class="btn btn-info">View Payments</a>
+                        <a href="{{ url_for('admin.payment_list', status='pending') }}" class="btn btn-warning">Pending Payments</a>
+                    {% endif %}
+                    
+                    {% if role in ['super_admin', 'delivery_manager'] %}
+                        <a href="{{ url_for('admin.delivery_list') }}" class="btn btn-info">View Deliveries</a>
+                        <a href="{{ url_for('admin.delivery_list', status='in_transit') }}" class="btn btn-warning">In Transit</a>
+                    {% endif %}
+                    
+                    {% if role == 'super_admin' %}
+                        <a href="{{ url_for('admin.user_list') }}" class="btn btn-dark">Manage Admin Users</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-footer a {
+        font-weight: 600;
+    }
+    
+    .card h2 {
+        font-weight: 700;
+        margin: 0;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Checkout</h1>
+    
+    <div class="row mt-4">
+        <!-- Cart Summary & Payment -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Order Summary</h5>
+                    
+                    {% for item in cart_items %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>{{ item.product_name }} x{{ item.quantity }}</span>
+                        <span>₹{{ (item.price * item.quantity)|round(2) }}</span>
+                    </div>
+                    {% endfor %}
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>₹{{ subtotal|round(2) }}</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Shipping:</span>
+                        <span>₹{{ shipping|round(2) }}</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Tax (5%):</span>
+                        <span>₹{{ tax|round(2) }}</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between mb-3">
+                        <h6>Total:</h6>
+                        <h6>₹{{ total|round(2) }}</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Checkout Form -->
+        <div class="col-md-8">
+            <form method="POST">
+                <!-- Delivery Address -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Delivery Address</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if addresses %}
+                            <div class="mb-3">
+                                <label class="form-label">Select Address</label>
+                                {% for addr in addresses %}
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="address_id" value="{{ addr.address_id }}" id="addr{{ addr.address_id }}" {% if loop.first %}checked{% endif %}>
+                                    <label class="form-check-label" for="addr{{ addr.address_id }}">
+                                        <strong>{{ addr.address_type|upper }}</strong><br>
+                                        {{ addr.street_address }}, {{ addr.city }}<br>
+                                        {{ addr.state }} - {{ addr.postal_code }}<br>
+                                        <small class="text-muted">{{ addr.phone }}</small>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted">No addresses found. Please add an address.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Payment Method -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Payment Method</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="payment_method" value="upi" id="payment_upi" required>
+                            <label class="form-check-label" for="payment_upi">
+                                <strong>UPI</strong><br>
+                                <small class="text-muted">Google Pay, PhonePe, Paytm</small>
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payment_method" value="card" id="payment_card">
+                            <label class="form-check-label" for="payment_card">
+                                <strong>Debit / Credit Card</strong><br>
+                                <small class="text-muted">Visa, Mastercard, RuPay</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <button type="submit" class="btn btn-primary btn-lg w-100 mb-2">Continue to Payment</button>
+                <a href="{{ url_for('cart.view_cart') }}" class="btn btn-secondary btn-lg w-100">Back to Cart</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

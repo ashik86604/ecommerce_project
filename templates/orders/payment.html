@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+<div class="row justify-content-center">
+<div class="col-md-6">
+
+<div class="card">
+<div class="card-body">
+
+<h2 class="text-center mb-4">Payment</h2>
+
+<div class="alert alert-info">
+<strong>Order ID:</strong> #{{ order.order_id }} <br>
+<strong>Amount:</strong> ₹{{ order.total_amount }} <br>
+<strong>Payment:</strong> Razorpay Secure Payment
+</div>
+
+<button type="button" id="paymentButton"
+class="btn btn-success btn-lg w-100 mb-2">
+
+Pay ₹{{ order.total_amount }}
+
+</button>
+
+<a href="{{ url_for('order.list_orders') }}"
+class="btn btn-secondary w-100">
+
+Cancel
+
+</a>
+
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+
+var razorpayKey = "{{ razorpay_key }}";
+var razorpayOrderId = "{{ razorpay_order.id }}";
+var orderId = "{{ order.order_id }}";
+var amount = parseInt("{{ (order.total_amount * 100) | int }}");
+var verifyUrl = "{{ url_for('order.verify_payment', order_id=order.order_id) }}";
+
+document.getElementById("paymentButton").onclick = function(){
+
+var options = {
+
+key: razorpayKey,
+
+amount: amount,
+
+currency: "INR",
+
+name: "Ecommerce Store",
+
+description: "Order #" + orderId,
+
+order_id: razorpayOrderId,
+
+handler: function (response){
+
+fetch(verifyUrl, {
+
+method: "POST",
+
+headers: {
+"Content-Type": "application/json"
+},
+
+body: JSON.stringify({
+
+razorpay_payment_id: response.razorpay_payment_id,
+
+razorpay_order_id: response.razorpay_order_id,
+
+razorpay_signature: response.razorpay_signature
+
+})
+
+})
+
+.then(res => res.json())
+
+.then(data => {
+
+if(data.success){
+
+alert("Payment Successful");
+
+window.location.href = "/orders/" + orderId;
+
+}else{
+
+alert("Payment verification failed");
+
+}
+
+});
+
+}
+
+};
+
+var rzp = new Razorpay(options);
+
+rzp.open();
+
+};
+
+</script>
+
+{% endblock %}

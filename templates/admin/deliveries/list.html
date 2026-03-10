@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Delivery Management</h1>
+    </div>
+    
+    <!-- Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-6">
+                    <label for="status" class="form-label">Filter by Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">All Deliveries</option>
+                        <option value="processing" {% if status_filter == 'processing' %}selected{% endif %}>Processing</option>
+                        <option value="in_transit" {% if status_filter == 'in_transit' %}selected{% endif %}>In Transit</option>
+                        <option value="out_for_delivery" {% if status_filter == 'out_for_delivery' %}selected{% endif %}>Out for Delivery</option>
+                        <option value="delivered" {% if status_filter == 'delivered' %}selected{% endif %}>Delivered</option>
+                        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a href="{{ url_for('admin.delivery_list') }}" class="btn btn-secondary ms-2">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Deliveries Table -->
+    {% if deliveries %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Current Status</th>
+                        <th>Location</th>
+                        <th>Last Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for delivery in deliveries %}
+                    <tr>
+                        <td><strong>#{{ delivery.order_id }}</strong></td>
+                        <td>
+                            <strong>{{ delivery.username }}</strong><br>
+                            <small class="text-muted">{{ delivery.email }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if delivery.status == 'delivered' %}success{% elif delivery.status == 'cancelled' %}danger{% elif delivery.status in ['in_transit', 'out_for_delivery'] %}info{% else %}secondary{% endif %}">
+                                {{ delivery.status|replace('_', ' ')|upper }}
+                            </span>
+                        </td>
+                        <td>{{ delivery.location or '—' }}</td>
+                        <td>{{ delivery.status_update_date.strftime('%d %b %Y') }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.delivery_detail', order_id=delivery.order_id) }}" class="btn btn-sm btn-primary">Track</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">No deliveries found</div>
+    {% endif %}
+</div>
+{% endblock %}

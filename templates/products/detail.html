@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('product.list_products') }}">Products</a></li>
+            <li class="breadcrumb-item active">{{ product.product_name }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <!-- Product Images -->
+        <div class="col-md-5">
+            <div class="mb-3">
+                {% if images %}
+                    <img id="mainImage" src="{{ images[0].image_url }}" class="img-fluid" alt="{{ product.product_name }}">
+                {% else %}
+                    <div class="bg-light p-5 text-center">
+                        <span class="text-muted">No image available</span>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Thumbnail Gallery -->
+            {% if images|length > 1 %}
+            <div class="row g-2">
+                {% for image in images %}
+                <div class="col-3">
+                    <img src="{{ image.image_url }}" class="img-thumbnail cursor-pointer" onclick="changeImage('{{ image.image_url }}')" alt="Thumbnail">
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Product Details -->
+        <div class="col-md-7">
+            <h1>{{ product.product_name }}</h1>
+            
+            <!-- Category -->
+            <p class="text-muted">
+                Category: <a href="{{ url_for('product.list_products', category=product.category_id) }}">{{ product.category_name }}</a>
+            </p>
+            
+            <!-- Rating -->
+            <div class="mb-3">
+                <span class="badge bg-warning">⭐ {{ product.rating|round(1) }}</span>
+                <span class="text-muted">({{ product.total_reviews }} reviews)</span>
+            </div>
+            
+            <!-- Price -->
+            <div class="mb-3">
+                {% if product.discount_price %}
+                    <h3 class="text-danger">₹{{ product.discount_price }}</h3>
+                    <p class="text-muted">
+                        <span class="text-decoration-line-through">₹{{ product.price }}</span>
+                        <span class="badge bg-success">{{ ((product.price - product.discount_price) / product.price * 100)|round|int }}% OFF</span>
+                    </p>
+                {% else %}
+                    <h3>₹{{ product.price }}</h3>
+                {% endif %}
+            </div>
+            
+            <!-- Stock Status -->
+            <div class="mb-3">
+                {% if product.stock_quantity > 5 %}
+                    <span class="badge bg-success">In Stock ({{ product.stock_quantity }} available)</span>
+                {% elif product.stock_quantity > 0 %}
+                    <span class="badge bg-warning">Low Stock ({{ product.stock_quantity }} available)</span>
+                {% else %}
+                    <span class="badge bg-danger">Out of Stock</span>
+                {% endif %}
+            </div>
+            
+            <!-- Description -->
+            <div class="mb-4">
+                <h5>Description</h5>
+                <p>{{ product.description }}</p>
+            </div>
+            
+            <!-- Add to Cart -->
+            {% if product.stock_quantity > 0 %}
+            <div class="mb-4">
+                <div class="input-group mb-3" style="width: 200px;">
+                    <button class="btn btn-outline-secondary" type="button" id="decreaseQty">-</button>
+                    <input type="number" class="form-control text-center" id="quantity" value="1" min="1" max="{{ product.stock_quantity }}">
+                    <button class="btn btn-outline-secondary" type="button" id="increaseQty">+</button>
+                </div>
+                <button class="btn btn-primary btn-lg" id="addToCartBtn" data-product-id="{{ product.product_id }}">Add to Cart</button>
+            </div>
+            {% else %}
+            <button class="btn btn-secondary btn-lg" disabled>Out of Stock</button>
+            {% endif %}
+            
+            <!-- Product Info -->
+            <div class="border-top pt-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>SKU:</strong> {{ product.sku or 'N/A' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Availability:</strong> 
+                            {% if product.stock_quantity > 0 %}
+                                In Stock
+                            {% else %}
+                                Out of Stock
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reviews Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3>Customer Reviews</h3>
+            
+            {% if reviews %}
+                {% for review in reviews %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title">{{ review.username }}</h6>
+                                <p class="card-text">⭐ {{ review.rating }} / 5</p>
+                            </div>
+                            <small class="text-muted">{{ review.created_at.strftime('%d %b %Y') }}</small>
+                        </div>
+                        <p class="card-text">{{ review.comment }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No reviews yet. Be the first to review!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+const qtyInput = document.getElementById('quantity');
+const maxQty = parseInt(qtyInput.max);
+
+// Decrease quantity button
+const decreaseBtn = document.getElementById('decreaseQty');
+if (decreaseBtn) {
+    decreaseBtn.addEventListener('click', function() {
+        if (parseInt(qtyInput.value) > 1) {
+            qtyInput.value = parseInt(qtyInput.value) - 1;
+        }
+    });
+}
+
+// Increase quantity button
+const increaseBtn = document.getElementById('increaseQty');
+if (increaseBtn) {
+    increaseBtn.addEventListener('click', function() {
+        if (parseInt(qtyInput.value) < maxQty) {
+            qtyInput.value = parseInt(qtyInput.value) + 1;
+        }
+    });
+}
+
+// Add to cart button
+const addToCartBtn = document.getElementById('addToCartBtn');
+if (addToCartBtn) {
+    addToCartBtn.addEventListener('click', function() {
+        const productId = parseInt(this.getAttribute('data-product-id'));
+        const quantity = parseInt(qtyInput.value);
+        const addToCartUrl = "{{ url_for('cart.add_to_cart') }}";
+        
+        if (!productId || isNaN(productId)) {
+            alert('Error: Product ID is invalid');
+            return;
+        }
+        
+        fetch(addToCartUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_id: productId, quantity: quantity })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                updateCartCount();
+                qtyInput.value = 1;
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+        });
+    });
+}
+
+// Change main image
+function changeImage(src) {
+    document.getElementById('mainImage').src = src;
+}
+
+// Update cart count
+function updateCartCount() {
+    const cartCountUrl = "{{ url_for('cart.get_cart_count') }}";
+    fetch(cartCountUrl)
+        .then(r => r.json())
+        .then(data => {
+            const badge = document.querySelector('.cart-count');
+            if (badge) {
+                badge.textContent = data.count;
+            }
+        })
+        .catch(error => console.log('Error updating cart count:', error));
+}
+</script>
+{% endblock %}

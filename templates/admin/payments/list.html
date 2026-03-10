@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Payment Management</h1>
+    </div>
+    
+    <!-- Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-6">
+                    <label for="status" class="form-label">Filter by Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">All Payments</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="success" {% if status_filter == 'success' %}selected{% endif %}>Success</option>
+                        <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>Failed</option>
+                    </select>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a href="{{ url_for('admin.payment_list') }}" class="btn btn-secondary ms-2">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Payments Table -->
+    {% if payments %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Payment ID</th>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td><strong>#{{ payment.payment_id }}</strong></td>
+                        <td>
+                            <a href="{{ url_for('admin.order_detail', order_id=payment.order_id) }}">
+                                #{{ payment.order_id }}
+                            </a>
+                        </td>
+                        <td>
+                            <strong>{{ payment.username }}</strong><br>
+                            <small class="text-muted">{{ payment.email }}</small>
+                        </td>
+                        <td>₹{{ payment.payment_amount|round(2) }}</td>
+                        <td>{{ payment.payment_method|upper }}</td>
+                        <td>
+                            <span class="badge bg-{% if payment.payment_status == 'success' %}success{% elif payment.payment_status == 'failed' %}danger{% elif payment.payment_status == 'refunded' %}warning{% else %}info{% endif %}">
+                                {{ payment.payment_status|upper }}
+                            </span>
+                        </td>
+                        <td>{{ payment.payment_date.strftime('%d %b %Y') }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.payment_detail', payment_id=payment.payment_id) }}" class="btn btn-sm btn-primary">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">No payments found</div>
+    {% endif %}
+</div>
+{% endblock %}

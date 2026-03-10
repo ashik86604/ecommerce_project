@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <a href="{{ url_for('admin.payment_list') }}" class="btn btn-secondary mb-3">← Back</a>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Payment Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Payment #{{ payment.payment_id }} Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Order ID</h6>
+                            <p><strong><a href="{{ url_for('admin.order_detail', order_id=payment.order_id) }}">#{{ payment.order_id }}</a></strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Transaction ID</h6>
+                            <p><strong>{{ payment.transaction_id }}</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Amount</h6>
+                            <p><strong>₹{{ payment.payment_amount|round(2) }}</strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Payment Method</h6>
+                            <p><strong>{{ payment.payment_method|upper }}</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Payment Date</h6>
+                            <p><strong>{{ payment.payment_date.strftime('%d %b %Y, %I:%M %p') }}</strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Customer</h6>
+                            <p>
+                                <strong>{{ payment.username }}</strong><br>
+                                <small class="text-muted">{{ payment.email }}</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Refunds -->
+            {% if refunds %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Refunds</h5>
+                </div>
+                <div class="card-body">
+                    {% for refund in refunds %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Refund Amount</h6>
+                                <p><strong>₹{{ refund.refund_amount|round(2) }}</strong></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Status</h6>
+                                <span class="badge bg-success">{{ refund.refund_status|upper }}</span>
+                            </div>
+                        </div>
+                        <p class="text-muted"><small><strong>Reason:</strong> {{ refund.refund_reason }}</small></p>
+<p class="text-muted">
+<small><strong>Date:</strong> {{ refund.request_date.strftime('%d %b %Y') }}</small>
+</p>                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <div class="card sticky-top">
+                <div class="card-header">
+                    <h5>Payment Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted">Current Status</h6>
+                        <span class="badge bg-{% if payment.payment_status == 'success' %}success{% elif payment.payment_status == 'refunded' %}warning{% else %}danger{% endif %} p-2">
+                            {{ payment.payment_status|upper }}
+                        </span>
+                    </div>
+                    
+                    <hr>
+                    
+                    {% if payment.payment_status == 'success' and not refunds %}
+                    <h6 class="mb-3">Process Refund</h6>
+                    <form method="POST" action="{{ url_for('admin.refund_payment', payment_id=payment.payment_id) }}">
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason</label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3" required>Customer requested refund</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Process refund?')">Process Refund</button>
+                    </form>
+                    {% else %}
+                    <p class="text-muted">No refund actions available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

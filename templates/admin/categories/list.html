@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Categories Management</h1>
+        <a href="{{ url_for('admin.add_category') }}" class="btn btn-primary">+ Add Category</a>
+    </div>
+    
+    {% if categories %}
+        <div class="row">
+            {% for cat in categories %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ cat.category_name }}</h5>
+                        <p class="card-text text-muted">{{ cat.description or 'No description' }}</p>
+                        <form method="POST" action="{{ url_for('admin.delete_category', category_id=cat.category_id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <p>No categories found. <a href="{{ url_for('admin.add_category') }}">Add your first category</a></p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

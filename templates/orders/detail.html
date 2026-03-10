@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h1>Order #{{ order.order_id }}</h1>
+            <p class="text-muted">{{ order.order_date.strftime('%d %b %Y, %I:%M %p') }}</p>
+            
+            <!-- Order Items -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Order Items</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('product.product_detail', product_id=item.product_id) }}">
+                                            {{ item.product_name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>₹{{ item.unit_price|round(2) }}</td>
+                                    <td>₹{{ (item.unit_price * item.quantity)|round(2) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Tracking -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Delivery Tracking</h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for track in tracking %}
+                        <div class="timeline-item mb-3">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <span class="badge bg-primary">✓</span>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6>{{ track.status|replace('_', ' ')|upper }}</h6>
+                                    <p class="text-muted small">{{ track.status_update_date.strftime('%d %b %Y, %I:%M %p') }}</p>
+                                    {% if track.location %}
+                                        <p>📍 {{ track.location }}</p>
+                                    {% endif %}
+                                    {% if track.notes %}
+                                        <p class="text-muted"><small>{{ track.notes }}</small></p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Summary Sidebar -->
+        <div class="col-md-4">
+            <div class="card sticky-top">
+                <div class="card-body">
+                    <h5 class="card-title">Order Summary</h5>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <strong>Order Status:</strong><br>
+                        <span class="badge bg-{% if order.order_status == 'delivered' %}success{% elif order.order_status == 'cancelled' %}danger{% else %}info{% endif %}">
+                            {{ order.order_status|replace('_', ' ')|upper }}
+                        </span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Payment Status:</strong><br>
+                        <span class="badge bg-{% if order.payment_status == 'verified' %}success{% else %}warning{% endif %}">
+                            {{ order.payment_status|upper }}
+                        </span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Total Amount:</strong><br>
+                        ₹{{ order.total_amount|round(2) }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Estimated Delivery:</strong><br>
+                        {{ order.estimated_delivery.strftime('%d %b %Y') }}
+                    </div>
+                    
+                    <hr>
+                    
+                    {% if order.order_status != 'delivered' and order.order_status != 'cancelled' %}
+                    <form method="POST" action="{{ url_for('order.cancel_order', order_id=order.order_id) }}">
+                        <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Cancel this order?')">
+                            Cancel Order
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

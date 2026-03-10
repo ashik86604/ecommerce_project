@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Order Management</h1>
+    </div>
+    
+    <!-- Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-6">
+                    <label for="status" class="form-label">Filter by Status</label>
+                    <!-- <select class="form-select" id="status" name="status">
+                        <option value="">All Orders</option>
+                        <option value="placed" {% if status_filter == 'placed' %}selected{% endif %}>Placed</option>
+                        <option value="payment_verified" {% if status_filter == 'payment_verified' %}selected{% endif %}>Payment Verified</option>
+                        <option value="processing" {% if status_filter == 'processing' %}selected{% endif %}>Processing</option>
+                        <option value="shipped" {% if status_filter == 'shipped' %}selected{% endif %}>Shipped</option>
+                        <option value="delivered" {% if status_filter == 'delivered' %}selected{% endif %}>Delivered</option>
+                        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select> -->
+                    <select class="form-select" id="status" name="status">
+                        <option value="">All Orders</option>
+
+                        <option value="placed" {% if status_filter == 'placed' %}selected{% endif %}>Placed</option>
+
+                        <option value="processing" {% if status_filter == 'processing' %}selected{% endif %}>Processing</option>
+
+                        <option value="packed" {% if status_filter == 'packed' %}selected{% endif %}>Packed</option>
+
+                        <option value="shipped" {% if status_filter == 'shipped' %}selected{% endif %}>Shipped</option>
+
+                        <option value="out_for_delivery" {% if status_filter == 'out_for_delivery' %}selected{% endif %}>Out For Delivery</option>
+
+                        <option value="delivered" {% if status_filter == 'delivered' %}selected{% endif %}>Delivered</option>
+
+                        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                    <a href="{{ url_for('admin.order_list') }}" class="btn btn-secondary ms-2">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Orders Table -->
+    {% if orders %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Payment Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td><strong>#{{ order.order_id }}</strong></td>
+                        <td>
+                            <strong>{{ order.username }}</strong><br>
+                            <small class="text-muted">{{ order.email }}</small>
+                        </td>
+                        <td>{{ order.item_count }}</td>
+                        <td>₹{{ order.total_amount|round(2) }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if order.order_status == 'placed' %}bg-secondary
+                                {% elif order.order_status == 'processing' %}bg-warning
+                                {% elif order.order_status == 'packed' %}bg-info
+                                {% elif order.order_status == 'shipped' %}bg-dark
+                                {% elif order.order_status == 'out_for_delivery' %}bg-primary
+                                {% elif order.order_status == 'delivered' %}bg-success
+                                {% elif order.order_status == 'cancelled' %}bg-danger
+                                {% endif %}">
+                                {{ order.order_status|replace('_', ' ')|upper }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if order.payment_status == 'verified' %}success{% else %}warning{% endif %}">
+                                {{ order.payment_status|upper }}
+                            </span>
+                        </td>
+                        <td>{{ order.order_date.strftime('%d %b %Y') }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.order_detail', order_id=order.order_id) }}" class="btn btn-sm btn-primary">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">No orders found</div>
+    {% endif %}
+</div>
+{% endblock %}

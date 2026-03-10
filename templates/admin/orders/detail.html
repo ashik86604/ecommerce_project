@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <a href="{{ url_for('admin.order_list') }}" class="btn btn-secondary mb-3">← Back</a>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Order Items -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Order #{{ order.order_id }} Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Order Date</h6>
+                            <p><strong>{{ order.order_date.strftime('%d %b %Y, %I:%M %p') }}</strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Estimated Delivery</h6>
+                            <p><strong>{{ order.estimated_delivery.strftime('%d %b %Y') }}</strong></p>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mt-4 mb-3">Items</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>{{ item.product_name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>₹{{ item.unit_price|round(2) }}</td>
+                                    <td>₹{{ (item.unit_price * item.quantity)|round(2) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shipping Address -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Shipping Address</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <strong>{{ order.street_address }}</strong><br>
+                        {{ order.city }}, {{ order.state }} - {{ order.postal_code }}<br>
+                        <strong>Phone:</strong> {{ order.phone }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar - Update Status -->
+        <div class="col-md-4">
+            <div class="card sticky-top">
+                <div class="card-header">
+                    <h5>Order Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted">Current Status</h6>
+                        <span class="badge
+                        {% if order.order_status == 'placed' %}bg-secondary
+                        {% elif order.order_status == 'payment_verified' %}bg-primary
+                        {% elif order.order_status == 'processing' %}bg-warning
+                        {% elif order.order_status == 'packed' %}bg-info
+                        {% elif order.order_status == 'shipped' %}bg-dark
+                        {% elif order.order_status == 'out_for_delivery' %}bg-primary
+                        {% elif order.order_status == 'delivered' %}bg-success
+                        {% elif order.order_status == 'cancelled' %}bg-danger
+                        {% endif %} p-2">       
+                        {{ order.order_status|replace('_', ' ')|upper }}
+                        </span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted">Payment Status</h6>
+                        <span class="badge bg-{% if order.payment_status == 'verified' %}success{% else %}warning{% endif %} p-2">
+                            {{ order.payment_status|upper }}
+                        </span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h6 class="mb-3">Update Status</h6>
+                    <form method="POST" action="{{ url_for('admin.update_order_status', order_id=order.order_id) }}">
+                        <div class="mb-3">
+                            <!-- <select class="form-select" name="status" required>
+                                <option value="">-- Select Status --</option>
+                                <option value="placed">Placed</option>
+                                <option value="payment_verified">Payment Verified</option>
+                                <option value="processing">Processing</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select> -->
+                            <select class="form-select" name="status" required>
+
+                                <option value="">-- Select Status --</option>
+
+                                <option value="placed">Placed</option>
+
+                                <option value="payment_verified">Payment Verified</option>
+
+                                <option value="processing">Processing</option>
+
+                                <option value="packed">Packed</option>
+
+                                <option value="shipped">Shipped</option>
+
+                                <option value="out_for_delivery">Out For Delivery</option>
+
+                                <option value="delivered">Delivered</option>
+
+                                <option value="cancelled">Cancelled</option>
+
+                                </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Update Status</button>
+                    </form>
+                    
+                    <!-- Order Summary -->
+                    <hr>
+                    <h6 class="mb-3">Summary</h6>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Total Amount:</span>
+                        <strong>₹{{ order.total_amount|round(2) }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
